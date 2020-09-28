@@ -15,7 +15,6 @@ socketio = SocketIO(app, message_queue='amqp:///socketio')
 def index():
 
     # create a unique session id
-
     if 'uid' not in session:
         session['uid'] = str(uuid.uuid4())
 
