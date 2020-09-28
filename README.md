@@ -8,12 +8,14 @@ then install requirements:
 ####Celery configurations:  
 
 `sudo apt-get install rabbitmq-server`
+if rabbitmq didnt up try: `sudo rabbitmq-server start`
 `celery -A tasks worker`
 
 ####RabbitMQ configurations: 
 
+`export PATH=$PATH:/usr/local/sbin`
 `sudo rabbitmqctl add_vhost socketio`   
-`rabbitmqctl set_permissions -p socketio guest "^.*" ".*" ".*"`  
+`sudo rabbitmqctl set_permissions -p socketio guest "^.*" ".*" ".*"`  
 
 ####Start flask application:
 `flask run`
