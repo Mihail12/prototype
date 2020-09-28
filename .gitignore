@@ -1,0 +1,42 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+/dist
+/storybook-static
+/tmp
+/aot
+/documentation
+
+# dependencies
+/node_modules
+/bower_components
+
+# IDEs and editors
+.idea
+/.idea
+.vscode
+.history
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage/*
+/libpeerconnection.log
+npm-debug.log
+testem.log
+/typings
+
+yarn.lock
+
+# e2e
+/e2e/*.js
+/e2e/*.map
+
+#System Files
+.DS_Store
+Thumbs.db
+*.ngfactory.ts
+*ss.shim.ts
+*.scss.ts
+*.css.ts
+package-lock.json
