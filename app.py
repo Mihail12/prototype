@@ -1,3 +1,5 @@
+import time
+
 from flask import Flask, render_template, redirect, url_for, request, jsonify, session
 from flask_socketio import SocketIO, join_room
 import uuid
@@ -27,7 +29,7 @@ def long_task_endpoint():
     namespace = request.form.get('namespace')
     n = randint(0, 100)
     sid = str(session['uid'])
-    task = tasks.long_task.delay(n=n, session=sid, task_event=task_event, namespace=namespace)
+    task = tasks.long_task.apply_async((n, sid, task_event, namespace), queue='low_priority')
 
     return jsonify({'id': task.id})
 
@@ -49,6 +51,16 @@ def matrix_task_endpoint():
     sid = str(session['uid'])
     task = tasks.matrix_task.delay(session=sid, task_event=task_event, namespace=namespace)
     return jsonify({'id': task.id})
+
+
+@app.route("/api/test", methods=['GET'])
+def test_api():
+
+    time.sleep(4)
+    variable = '12345'
+
+    return jsonify({'variable': variable})
+
 
 
 @socketio.on('connect')

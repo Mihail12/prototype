@@ -67,8 +67,8 @@ def matrix_task(session, task_event, namespace):
     send_message('status', namespace, room, 'Begin')
     send_message(task_event, namespace, room, 'Begin task {}'.format(matrix_task.request.id))
 
-    a = numpy.random.rand(10000, 100)
-    b = numpy.random.rand(30000, 100)
+    a = numpy.random.rand(100000, 100)
+    b = numpy.random.rand(300000, 100)
     c = numpy.dot(b, a.T)
     send_message(task_event, namespace, room, 'Matrices doted')
 

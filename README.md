@@ -8,8 +8,8 @@ then install requirements:
 ####Celery configurations:  
 
 `redis-server`  
-`celery -A tasks worker -n worker1 -c 1`  
-`celery -A tasks worker -n worker2 -c 1`    
+`celery -A tasks worker -n worker1 -c 1 --queues=low_priority`  
+`celery -A tasks worker -n worker2 -c 1 --queues=high_priority``    
 `celery -A tasks worker -n worker3 -c 1`   
 
 to kill all workers type:  
