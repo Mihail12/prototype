@@ -8,9 +8,12 @@ then install requirements:
 ####Celery configurations:  
 
 `redis-server`  
-`celery -A tasks worker -n 1 --logfile=/dev/null`  
-`celery -A tasks worker -n 2 --logfile=/dev/null`    
-`celery -A tasks worker -n 3 --logfile=/dev/null`   
+`celery -A tasks worker -n worker1 -c 1`  
+`celery -A tasks worker -n worker2 -c 1`    
+`celery -A tasks worker -n worker3 -c 1`   
+
+to kill all workers type:  
+`ps auxww | grep 'worker' | awk '{print $2}' | xargs kill -9`
 
 ####Start flask application:
 `flask run`
