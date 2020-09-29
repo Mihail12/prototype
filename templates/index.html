@@ -1,30 +1,95 @@
 <html>
 <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
     <title>Long Running Task App</title>
 </head>
 <body><div>Click the button to start a task.</div>
-<form method='post' id="taskForm">
-    <button type="submit" id="taskButton">Task</button>
-</form>
-<div id="Results"></div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-4">
+            <form method='post' id="taskForm-1">
+                <input type="hidden" name="task-event" value="task-1">
+                <input type="hidden" name="namespace" value="/task-1">
+                <button type="submit" id="taskButton-1">For Loop</button>
+            </form>
+            <div id="Results-1"></div>
+        </div>
+        <div class="col-sm-4">
+            <form method='post' id="taskForm-2">
+                <input type="hidden" name="task-event" value="task-2">
+                <input type="hidden" name="namespace" value="/task-2">
+                <button type="submit" id="taskButton-2">Fibonacci</button>
+            </form>
+            <div id="Results-2"></div>
+        </div>
+        <div class="col-sm-4">
+            <form method='post' id="taskForm-3">
+                <input type="hidden" name="task-event" value="task-3">
+                <input type="hidden" name="namespace" value="/task-3">
+                <button type="submit" id="taskButton-3">Matrix operations</button>
+            </form>
+            <div id="Results-3"></div>
+        </div>
+    </div>
+</div>
+
 
 
 <script>
     $(document).ready(function(){
         var namespace='/long_task';
         var socket = io.connect('http://' + document.domain + ':' + location.port+namespace);
+        var event_name = 'task-1'
         socket.on('connect', function() {
             //// on a connection join a room
             socket.emit('join_room');
         });
-        socket.on('msg', function(data) {
-            $("#Results").prepend('<li>'+data.msg+'</li>');
+        socket.on(event_name, function(data) {
+            $("#Results-1").prepend('<li>'+data.msg+'</li>');
         });
         socket.on('status', function(data) {
             if (data.msg=='End'){
-                $("#taskButton").show()
+                $("#taskButton-1").show()
+            };
+        });
+
+    });
+    $(document).ready(function(){
+        var namespace='/long_task';
+        var socket = io.connect('http://' + document.domain + ':' + location.port+namespace);
+        var event_name = 'task-2'
+        socket.on('connect', function() {
+            //// on a connection join a room
+            socket.emit('join_room');
+        });
+        socket.on(event_name, function(data) {
+            $("#Results-2").prepend('<li>'+data.msg+'</li>');
+        });
+        socket.on('status', function(data) {
+            if (data.msg=='End'){
+                $("#taskButton-2").show()
+            };
+        });
+
+    });
+    $(document).ready(function(){
+        var namespace='/long_task';
+        var socket = io.connect('http://' + document.domain + ':' + location.port+namespace);
+        var event_name = 'task-3'
+        socket.on('connect', function() {
+            //// on a connection join a room
+            socket.emit('join_room');
+        });
+        socket.on(event_name, function(data) {
+            $("#Results-3").prepend('<li>'+data.msg+'</li>');
+        });
+        socket.on('status', function(data) {
+            if (data.msg=='End'){
+                $("#taskButton-3").show()
             };
         });
 
@@ -32,15 +97,43 @@
 
 </script>
 <script>
-    $("#taskButton").click(function(e){
-        $("#taskButton").hide();
+    $("#taskButton-1").click(function(e){
+        $("#taskButton-1").hide();
         $.ajax({ type: "POST",
             url:'/runTask',
-            data: $("#taskForm").serialize(),
+            data: $("#taskForm-1").serialize(),
             success:function(data)
             {task=data.id;
-                $("#Results").empty();
-                $("#Results").prepend('<li>Task ID:'+task+' has been submitted.</li>');
+                $("#Results-1").empty();
+                $("#Results-1").prepend('<li>Task ID:'+task+' has been submitted.</li>');
+            }
+        });
+        e.preventDefault();
+        console.log('complete')
+    });
+    $("#taskButton-2").click(function(e){
+        $("#taskButton-2").hide();
+        $.ajax({ type: "POST",
+            url:'run-fibonacci-task',
+            data: $("#taskForm-2").serialize(),
+            success:function(data)
+            {task=data.id;
+                $("#Results-2").empty();
+                $("#Results-2").prepend('<li>Task ID:'+task+' has been submitted.</li>');
+            }
+        });
+        e.preventDefault();
+        console.log('complete')
+    });
+    $("#taskButton-3").click(function(e){
+        $("#taskButton-3").hide();
+        $.ajax({ type: "POST",
+            url:'matrix-task',
+            data: $("#taskForm-3").serialize(),
+            success:function(data)
+            {task=data.id;
+                $("#Results-3").empty();
+                $("#Results-3").prepend('<li>Task ID:'+task+' has been submitted.</li>');
             }
         });
         e.preventDefault();
