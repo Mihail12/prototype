@@ -1,9 +1,11 @@
+import resource
 import time
+from logging.handlers import RotatingFileHandler
 
 from flask import Flask, render_template, redirect, url_for, request, jsonify, session
 from flask_socketio import SocketIO, join_room
 import uuid
-from random import randint
+from random import randint, random
 import tasks
 
 
@@ -25,11 +27,18 @@ def index():
 
 @app.route("/runTask", methods=['POST'])
 def long_task_endpoint():
+    soft, hard = resource.getrlimit(resource.RLIMIT_CPU)
+    save_hard = hard
+    resource.setrlimit(resource.RLIMIT_CPU, (10, hard * 0.8))
+
+    print(f'CPU limited = {resource.getrlimit(resource.RLIMIT_CPU)}')
+
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
     n = randint(0, 100)
     sid = str(session['uid'])
-    task = tasks.long_task.apply_async((n, sid, task_event, namespace), queue='low_priority')
+    task = tasks.long_task.apply_async((n, sid, task_event, namespace))
+
 
     return jsonify({'id': task.id})
 
@@ -57,7 +66,7 @@ def matrix_task_endpoint():
 def test_api():
 
     time.sleep(4)
-    variable = '12345'
+    variable = randint(1, 10000)
 
     return jsonify({'variable': variable})
 
@@ -79,5 +88,8 @@ def on_room(*args, **kwargs):
 
 
 if __name__ == "__main__":
+
+    import logging
+    logging.basicConfig(filename='error.log', level=logging.DEBUG)
 
     socketio.run(app, debug=True, host="0.0.0.0")

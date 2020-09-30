@@ -11,17 +11,13 @@ sudo apt-get install supervisor -y
 
 sudo service supervisor start
 
-`ps auxww | grep 'supervisord' | awk '{print $2}' | xargs kill -9`
-`ps auxww | grep 'celery-worker' | awk '{print $2}' | xargs kill -9`
-`supervisord -c /Users/michaelspa/PycharmProjects/prototype/celery.conf`
-
 `redis-server`  
-`celery -A tasks worker -n worker1 -c 1 --queues=low_priority`  
-`celery -A tasks worker -n worker2 -c 1 --queues=high_priority`    
-`celery -A tasks worker -n worker3 -c 1`   
+`supervisord -c /Users/michaelspasenko/PycharmProjects/prototype/celery.conf`
 
 to kill all workers type:  
-`ps auxww | grep 'worker' | awk '{print $2}' | xargs kill -9`
+`ps ax | grep celery | awk '{print $1}' | xargs kill -9`
+`ps ax | grep supervisor | awk '{print $1}' | xargs kill -9`
+
 
 ####Start flask application:
 `flask run`
