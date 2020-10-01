@@ -35,7 +35,7 @@ def long_task(n, session, task_event, namespace):
     applogger.info("start long_task")
     applogger.info(f'proc index {os.getpid() }')
     task_pid = os.getpid()
-    limit_task_cpu_to = 20
+    limit_task_cpu_to = 50
     # set_cpu_limit(limit_task_cpu_to, task_pid)
     room = session
     namespace = '/long_task'

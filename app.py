@@ -15,6 +15,21 @@ app.secret_key = "DataRoadReflect"
 applogger = app.logger
 socketio = SocketIO(app, message_queue='redis://')
 
+user_1 = {
+    'id': 1,
+    'name': 'John',
+}
+
+user_2 = {
+    'id': 1,
+    'name': 'John',
+}
+
+user_3 = {
+    'id': 1,
+    'name': 'John',
+}
+
 
 @app.route("/", methods=['GET'])
 def index():
@@ -29,18 +44,12 @@ def index():
 @app.route("/runTask", methods=['POST'])
 def long_task_endpoint():
     applogger.info(f"long_task_endpoint touched with request method {request.method}")
-    soft, hard = resource.getrlimit(resource.RLIMIT_CPU)
-    save_hard = hard
-    resource.setrlimit(resource.RLIMIT_CPU, (10, hard * 0.8))
-
-    print(f'CPU limited = {resource.getrlimit(resource.RLIMIT_CPU)}')
 
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
     n = randint(0, 100)
     sid = str(session['uid'])
     task = tasks.long_task.apply_async((n, sid, task_event, namespace))
-
 
     return jsonify({'id': task.id})
 
@@ -76,8 +85,11 @@ def test_api():
 
 
 @socketio.on('connect')
-def socket_connect():
-    pass
+def socket_connect(*args, **kwargs):
+    user_data = args
+    print('connected')
+    # your logic ...
+    # app.login(user_data)
 
 
 @socketio.on('join_room', namespace='/long_task')
