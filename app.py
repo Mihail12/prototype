@@ -75,7 +75,6 @@ def test_api():
     return jsonify({'variable': variable})
 
 
-
 @socketio.on('connect')
 def socket_connect():
     pass

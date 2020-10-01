@@ -6,6 +6,8 @@ from flask_socketio import SocketIO
 from numpy import argsort
 
 from app import applogger
+import os
+import subprocess
 
 celery = Celery('demo', broker='redis://localhost:6379')
 
@@ -17,10 +19,24 @@ def send_message(event, namespace, room, message):
     socketio.emit(event, {'msg': message}, namespace=namespace, room=room)
 
 
+def set_cpu_limit(limit: int, task_pid):
+    '''
+    param limit: should be from 1 to 100 to limit current process
+    '''
+    subprocess.run(["cpulimit", "-l", limit, "-p", task_pid])
+
+
+def cpu_unlimit(task_pid):
+    subprocess.run(["cpulimit", "-l", 100, "-p", task_pid])
+
+
 @celery.task
 def long_task(n, session, task_event, namespace):
     applogger.info("start long_task")
-    applogger.info(f'proc index {str(current_process().index)}')
+    applogger.info(f'proc index {os.getpid() }')
+    task_pid = os.getpid()
+    limit_task_cpu_to = 20
+    # set_cpu_limit(limit_task_cpu_to, task_pid)
     room = session
     namespace = '/long_task'
 
@@ -34,6 +50,7 @@ def long_task(n, session, task_event, namespace):
 
     send_message(task_event, namespace, room, 'End Task {}'.format(long_task.request.id))
     send_message('status', namespace, room, 'End')
+    # cpu_unlimit(task_pid)
     applogger.info("end long_task")
 
 

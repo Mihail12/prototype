@@ -25,10 +25,12 @@ to kill all workers type:
 then visit http://127.0.0.1:5000/ add click the buttons
 
 
-wget -O cpulimit.zip https://github.com/opsengine/cpulimit/archive/master.zip
-unzip cpulimit.zip
-cd cpulimit-master
-make
-sudo cp src/cpulimit /usr/bin
+For cpu limit you should do:  
 
-cpulimit -l 50 -p 1234
+wget -O cpulimit.zip https://github.com/opsengine/cpulimit/archive/master.zip  
+unzip cpulimit.zip  
+cd cpulimit-master  
+make  
+sudo cp src/cpulimit /usr/bin  
+
+cpulimit -l 50 -p 1234  
