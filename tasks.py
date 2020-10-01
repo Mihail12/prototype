@@ -1,8 +1,11 @@
 import numpy
+from billiard.process import current_process
 from celery import Celery
 import time
 from flask_socketio import SocketIO
 from numpy import argsort
+
+from app import applogger
 
 celery = Celery('demo', broker='redis://localhost:6379')
 
@@ -16,6 +19,8 @@ def send_message(event, namespace, room, message):
 
 @celery.task
 def long_task(n, session, task_event, namespace):
+    applogger.info("start long_task")
+    applogger.info(f'proc index {str(current_process().index)}')
     room = session
     namespace = '/long_task'
 
@@ -29,11 +34,13 @@ def long_task(n, session, task_event, namespace):
 
     send_message(task_event, namespace, room, 'End Task {}'.format(long_task.request.id))
     send_message('status', namespace, room, 'End')
+    applogger.info("end long_task")
 
 
 @celery.task
 def fibonacci_task(n, session, task_event, namespace):
     room = session
+    applogger.info("start fibonacci_task")
     namespace = '/long_task'
 
     send_message('status', namespace, room, 'Begin')
@@ -56,11 +63,13 @@ def fibonacci_task(n, session, task_event, namespace):
             count += 1
     send_message(task_event, namespace, room, 'End Task {}'.format(fibonacci_task.request.id))
     send_message('status', namespace, room, 'End')
+    applogger.info("end fibonacci_task")
 
 
 @celery.task
 def matrix_task(session, task_event, namespace):
 
+    applogger.info("start matrix_task")
     room = session
     namespace = '/long_task'
 
@@ -78,3 +87,4 @@ def matrix_task(session, task_event, namespace):
 
     send_message(task_event, namespace, room, 'End Task {}'.format(matrix_task.request.id))
     send_message('status', namespace, room, 'End')
+    applogger.info("end matrix_task")

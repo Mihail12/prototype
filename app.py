@@ -1,17 +1,18 @@
 import resource
 import time
-from logging.handlers import RotatingFileHandler
 
-from flask import Flask, render_template, redirect, url_for, request, jsonify, session
+from flask import render_template, request, jsonify, session
 from flask_socketio import SocketIO, join_room
 import uuid
-from random import randint, random
+from random import randint
 import tasks
+from __init__ import create_app
 
 
-app = Flask(__name__)
+app = create_app()
 app.secret_key = "DataRoadReflect"
 
+applogger = app.logger
 socketio = SocketIO(app, message_queue='redis://')
 
 
@@ -27,6 +28,7 @@ def index():
 
 @app.route("/runTask", methods=['POST'])
 def long_task_endpoint():
+    applogger.info(f"long_task_endpoint touched with request method {request.method}")
     soft, hard = resource.getrlimit(resource.RLIMIT_CPU)
     save_hard = hard
     resource.setrlimit(resource.RLIMIT_CPU, (10, hard * 0.8))
@@ -45,6 +47,7 @@ def long_task_endpoint():
 
 @app.route("/run-fibonacci-task", methods=['POST'])
 def fibonacci_task_endpoint():
+    applogger.info(f"fibonacci_task_endpoint touched with request method {request.method}")
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
     n = randint(10000, 20000)
@@ -55,6 +58,7 @@ def fibonacci_task_endpoint():
 
 @app.route("/matrix-task", methods=['POST'])
 def matrix_task_endpoint():
+    applogger.info(f"matrix_task_endpoint touched with request method {request.method}")
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
     sid = str(session['uid'])
