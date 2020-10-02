@@ -47,7 +47,8 @@
 
 <script>
     $(document).ready(function(){
-        var socket = io.connect('http://' + document.domain + ':' + location.port + user_id);
+        var namespace='/long_task'
+        var socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
         var event_name = 'task-1'
         socket.on('connect', function() {
             //// on a connection join a room
