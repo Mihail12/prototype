@@ -36,7 +36,7 @@ def long_task(n, session, task_event, namespace):
     applogger.info(f'proc index {os.getpid() }')
     task_pid = os.getpid()
     limit_task_cpu_to = 50
-    set_cpu_limit(limit_task_cpu_to, task_pid)
+    # set_cpu_limit(limit_task_cpu_to, task_pid)
     room = session
     namespace = '/long_task'
 
@@ -50,7 +50,7 @@ def long_task(n, session, task_event, namespace):
 
     send_message(task_event, namespace, room, 'End Task {}'.format(long_task.request.id))
     send_message('status', namespace, room, 'End')
-    cpu_unlimit(task_pid)
+    # cpu_unlimit(task_pid)
     applogger.info("end long_task")
 
 
@@ -62,7 +62,7 @@ def fibonacci_task(n, session, task_event, namespace):
 
     task_pid = os.getpid()
     limit_task_cpu_to = 10
-    applogger.info(set_cpu_limit(limit_task_cpu_to, task_pid))
+    # set_cpu_limit(limit_task_cpu_to, task_pid)
 
     send_message('status', namespace, room, 'Begin')
     send_message(task_event, namespace, room, 'Begin task {}'.format(fibonacci_task.request.id))
@@ -85,7 +85,7 @@ def fibonacci_task(n, session, task_event, namespace):
     send_message(task_event, namespace, room, 'End Task {}'.format(fibonacci_task.request.id))
     send_message('status', namespace, room, 'End')
     applogger.info("end fibonacci_task")
-    cpu_unlimit(task_pid)
+    # cpu_unlimit(task_pid)
 
 
 @celery.task
@@ -99,7 +99,7 @@ def matrix_task(session, task_event, namespace):
     applogger.info(f'proc matrix index {os.getpid()}')
 
     limit_task_cpu_to = 10
-    set_cpu_limit(limit_task_cpu_to, task_pid)
+    # set_cpu_limit(limit_task_cpu_to, task_pid)
 
     send_message('status', namespace, room, 'Begin')
     send_message(task_event, namespace, room, 'Begin task {}'.format(matrix_task.request.id))
