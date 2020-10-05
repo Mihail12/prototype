@@ -128,7 +128,7 @@ def not_auth_long_task(n, task_event, namespace):
     applogger.info("start not_auth_long_task")
     namespace = '/long_task'
 
-    broadcast_message('status', namespace, 'Begin')
+    broadcast_message('status', namespace, 'Begin_not_auth')
     broadcast_message(task_event, namespace, 'Begin task {}'.format(long_task.request.id))
     broadcast_message(task_event, namespace, 'This task will take {} seconds.'.format(n))
 
