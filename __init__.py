@@ -10,7 +10,7 @@ def create_app():
     file_handler = logging.FileHandler("info.log")
     auth_file_handler = logging.FileHandler("auth.log")
     file_handler.setLevel(logging.DEBUG)
-    auth_file_handler.setLevel(logging.DEBUG)
+    auth_file_handler.setLevel(logging.WARNING)
 
     flask_app.logger.handlers.clear()
     flask_app.logger.addHandler(file_handler)
