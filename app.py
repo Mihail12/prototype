@@ -75,6 +75,16 @@ def matrix_task_endpoint():
     return jsonify({'id': task.id})
 
 
+@app.route("/run-not-auth-task", methods=['POST'])
+def not_auth_long_task_endpoint():
+    task_event = request.form.get('task-event')
+    namespace = request.form.get('namespace')
+    n = randint(0, 15)
+    task = tasks.not_auth_long_task.apply_async((n, task_event, namespace))
+
+    return jsonify({'id': task.id})
+
+
 @app.route("/api/test", methods=['GET'])
 def test_api():
 
@@ -86,6 +96,10 @@ def test_api():
 
 @socketio.on('connect')
 def socket_connect(*args, **kwargs):
+    # user = request.user
+    # if user.is_authenticated():
+    #     return 'Not Allowed'
+
     user_data = args
     print('connected')
     # your logic ...

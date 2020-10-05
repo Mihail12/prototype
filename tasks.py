@@ -19,6 +19,11 @@ def send_message(event, namespace, room, message):
     socketio.emit(event, {'msg': message}, namespace=namespace, room=room)
 
 
+def broadcast_message(event, namespace, message):
+    print(message)
+    socketio.emit(event, {'msg': message}, namespace=namespace, broadcast=True)
+
+
 def set_cpu_limit(limit: int, task_pid):
     '''
     param limit: should be from 1 to 100 to limit current process
@@ -116,3 +121,20 @@ def matrix_task(session, task_event, namespace):
     send_message(task_event, namespace, room, 'End Task {}'.format(matrix_task.request.id))
     send_message('status', namespace, room, 'End')
     applogger.info("end matrix_task")
+
+
+@celery.task
+def not_auth_long_task(n, task_event, namespace):
+    applogger.info("start not_auth_long_task")
+    namespace = '/long_task'
+
+    broadcast_message('status', namespace, 'Begin')
+    broadcast_message(task_event, namespace, 'Begin task {}'.format(long_task.request.id))
+    broadcast_message(task_event, namespace, 'This task will take {} seconds.'.format(n))
+
+    for i in range(n):
+        broadcast_message(task_event, namespace, str(i))
+        time.sleep(1)
+
+    broadcast_message(task_event, namespace, 'End Task {}'.format(long_task.request.id))
+    broadcast_message('status', namespace, 'End')
