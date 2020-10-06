@@ -36,41 +36,37 @@ def cpu_unlimit(task_pid):
 
 
 @celery.task
-def long_task(n, session, task_event, namespace):
+def long_task(n, task_event, namespace):
     applogger.info("start long_task")
     applogger.info(f'proc index {os.getpid() }')
-    task_pid = os.getpid()
-    limit_task_cpu_to = 50
+    # task_pid = os.getpid()
+    # limit_task_cpu_to = 50
     # set_cpu_limit(limit_task_cpu_to, task_pid)
-    room = session
-    namespace = '/long_task'
 
-    send_message('status', namespace, room, 'Begin')
-    send_message(task_event, namespace, room, 'Begin task {}'.format(long_task.request.id))
-    send_message(task_event, namespace, room, 'This task will take {} seconds.'.format(n))
+    broadcast_message('status', namespace, 'Begin')
+    broadcast_message(task_event, namespace, 'Begin task {}'.format(long_task.request.id))
+    broadcast_message(task_event, namespace, 'This task will take {} seconds.'.format(n))
 
     for i in range(n):
-        send_message(task_event, namespace, room, str(i))
+        broadcast_message(task_event, namespace, str(i))
         time.sleep(1)
 
-    send_message(task_event, namespace, room, 'End Task {}'.format(long_task.request.id))
-    send_message('status', namespace, room, 'End')
+    broadcast_message(task_event, namespace, 'End Task {}'.format(long_task.request.id))
+    broadcast_message('status', namespace, 'End')
     # cpu_unlimit(task_pid)
     applogger.info("end long_task")
 
 
 @celery.task
-def fibonacci_task(n, session, task_event, namespace):
-    room = session
+def fibonacci_task(n, task_event, namespace):
     applogger.info("start fibonacci_task")
-    namespace = '/long_task'
 
-    task_pid = os.getpid()
-    limit_task_cpu_to = 10
+    # task_pid = os.getpid()
+    # limit_task_cpu_to = 10
     # set_cpu_limit(limit_task_cpu_to, task_pid)
 
-    send_message('status', namespace, room, 'Begin')
-    send_message(task_event, namespace, room, 'Begin task {}'.format(fibonacci_task.request.id))
+    broadcast_message('status', namespace, 'Begin')
+    broadcast_message(task_event, namespace, 'Begin task {}'.format(fibonacci_task.request.id))
     n1, n2 = 0, 1
     count = 0
 
@@ -78,17 +74,17 @@ def fibonacci_task(n, session, task_event, namespace):
     if n <= 0:
         pass
     elif n == 1:
-        send_message(task_event, namespace, room, str(n1))
+        broadcast_message(task_event, namespace, str(n1))
     else:
         while count < n:
-            send_message(task_event, namespace, room, str(n1)[0:20])
+            broadcast_message(task_event, namespace, str(n1)[0:20])
             nth = n1 + n2
             # update values
             n1 = n2
             n2 = nth
             count += 1
-    send_message(task_event, namespace, room, 'End Task {}'.format(fibonacci_task.request.id))
-    send_message('status', namespace, room, 'End')
+    broadcast_message(task_event, namespace, 'End Task {}'.format(fibonacci_task.request.id))
+    broadcast_message('status', namespace, 'End')
     applogger.info("end fibonacci_task")
     # cpu_unlimit(task_pid)
 

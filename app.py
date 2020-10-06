@@ -1,3 +1,4 @@
+import random
 import resource
 import time
 
@@ -18,27 +19,41 @@ socketio = SocketIO(app, message_queue='redis://')
 user_1 = {
     'id': 1,
     'name': 'John',
+    'role': 'manager',
+    'age': 60,
 }
 
 user_2 = {
-    'id': 1,
-    'name': 'John',
+    'id': 2,
+    'name': 'Bob',
+    'role': 'manager',
+    'age': 22,
 }
 
 user_3 = {
-    'id': 1,
-    'name': 'John',
+    'id': 3,
+    'name': 'Jane',
+    'role': 'customer',
+    'age': 15,
 }
+user_4 = {
+    'id': 3,
+    'name': 'Jane',
+    'role': 'customer',
+    'age': 65,
+}
+users = [user_1, user_2, user_3, user_4]
 
 
 @app.route("/", methods=['GET'])
 def index():
-
+    current_user = random.choice(users)
     # create a unique session id
-    if 'uid' not in session:
-        session['uid'] = str(uuid.uuid4())
+    session['uid'] = current_user['id']
+    session['user_role'] = current_user['role']
+    session['age'] = current_user['age']
 
-    return render_template('index.html')
+    return render_template('index.html', **current_user)
 
 
 @app.route("/runTask", methods=['POST'])
@@ -47,9 +62,10 @@ def long_task_endpoint():
 
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
-    n = randint(0, 100)
+    n = randint(0, 20)
     sid = str(session['uid'])
-    task = tasks.long_task.apply_async((n, sid, task_event, namespace))
+    task = tasks.long_task.apply_async((n, task_event, namespace))
+    # task = tasks.long_task(n, task_event, namespace)
 
     return jsonify({'id': task.id})
 
@@ -60,8 +76,7 @@ def fibonacci_task_endpoint():
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
     n = randint(10000, 20000)
-    sid = str(session['uid'])
-    task = tasks.fibonacci_task.delay(n=n, session=sid, task_event=task_event, namespace=namespace)
+    task = tasks.fibonacci_task.delay(n=n, task_event=task_event, namespace=namespace)
     return jsonify({'id': task.id})
 
 
@@ -92,6 +107,24 @@ def test_api():
     variable = randint(1, 10000)
 
     return jsonify({'variable': variable})
+
+
+@socketio.on('connect', namespace='/managers')
+def socket_connect_auth(*args, **kwargs):
+    if session['user_role'] != 'manager':
+        print('NOT connected')
+        raise ConnectionRefusedError('unauthorized!')
+
+    print('connected')
+
+
+@socketio.on('connect', namespace='/aged')
+def socket_connect_auth(*args, **kwargs):
+    if int(session['age']) < 60:
+        print('NOT connected')
+        raise ConnectionRefusedError('unauthorized!')
+
+    print('connected')
 
 
 @socketio.on('connect')
