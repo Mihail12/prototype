@@ -63,7 +63,6 @@ def long_task_endpoint():
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
     n = randint(0, 20)
-    sid = str(session['uid'])
     task = tasks.long_task.apply_async((n, task_event, namespace))
     # task = tasks.long_task(n, task_event, namespace)
 
