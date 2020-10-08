@@ -28,4 +28,3 @@ class BaseTests(TestCase):
         # pdb.set_trace()
         # type here the data that should be created one along this class test
         # pdb.set_trace()
-        pass

@@ -12,7 +12,7 @@ class HomeEndpointTestCase(BaseTests):
         pass
 
     def setUp(self):
-        # here set the dta you need you need unique for each test
+        # here set the data you need you need unique for each test
         pass
         #  self.account_users = create_dummy_account_users(2, create_one_account_for_all=True)
 
