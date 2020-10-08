@@ -1,17 +1,17 @@
 import random
-import resource
 import time
 
+from celery import Celery
 from flask import render_template, request, jsonify, session
 from flask_socketio import SocketIO, join_room
-import uuid
 from random import randint
-import tasks
 from __init__ import create_app
 
 
 app = create_app()
 app.secret_key = "DataRoadReflect"
+
+celery = Celery('demo', broker='redis://localhost:6379', include=['tasks'])
 
 applogger = app.logger
 socketio = SocketIO(app, message_queue='redis://')
@@ -62,11 +62,10 @@ def long_task_endpoint():
 
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
-    n = randint(0, 20)
-    task = tasks.long_task.apply_async((n, task_event, namespace))
-    # task = tasks.long_task(n, task_event, namespace)
+    n = randint(5, 20)
+    task = celery.send_task('tasks.long_task', args=(n, task_event, namespace))
 
-    return jsonify({'id': task.id})
+    return jsonify({'id': task.id, "number": n})
 
 
 @app.route("/run-fibonacci-task", methods=['POST'])
@@ -75,8 +74,8 @@ def fibonacci_task_endpoint():
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
     n = randint(10000, 20000)
-    task = tasks.fibonacci_task.delay(n=n, task_event=task_event, namespace=namespace)
-    return jsonify({'id': task.id})
+    task = celery.send_task('tasks.fibonacci_task', args=(n, task_event, namespace))
+    return jsonify({'id': task.id, "number": n})
 
 
 @app.route("/matrix-task", methods=['POST'])
@@ -85,7 +84,7 @@ def matrix_task_endpoint():
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
     sid = str(session['uid'])
-    task = tasks.matrix_task.delay(session=sid, task_event=task_event, namespace=namespace)
+    task = celery.send_task('tasks.matrix_task', args=(sid, task_event, namespace))
     return jsonify({'id': task.id})
 
 
@@ -94,7 +93,7 @@ def not_auth_long_task_endpoint():
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
     n = randint(0, 15)
-    task = tasks.not_auth_long_task.apply_async((n, task_event, namespace))
+    task = celery.send_task('tasks.not_auth_long_task', args=(n, task_event, namespace))
 
     return jsonify({'id': task.id})
 

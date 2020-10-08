@@ -1,15 +1,11 @@
 import numpy
-from billiard.process import current_process
-from celery import Celery
 import time
 from flask_socketio import SocketIO
 from numpy import argsort
+from app import celery, applogger
 
-from app import applogger
 import os
-import subprocess
 
-celery = Celery('demo', broker='redis://localhost:6379')
 
 socketio = SocketIO(message_queue='redis://')
 
@@ -55,6 +51,7 @@ def long_task(n, task_event, namespace):
     broadcast_message('status', namespace, 'End')
     # cpu_unlimit(task_pid)
     applogger.info("end long_task")
+    return 'Done'
 
 
 @celery.task
@@ -87,6 +84,7 @@ def fibonacci_task(n, task_event, namespace):
     broadcast_message('status', namespace, 'End')
     applogger.info("end fibonacci_task")
     # cpu_unlimit(task_pid)
+    return n1
 
 
 @celery.task
@@ -134,3 +132,7 @@ def not_auth_long_task(n, task_event, namespace):
 
     broadcast_message(task_event, namespace, 'End Task {}'.format(long_task.request.id))
     broadcast_message('status', namespace, 'End')
+
+
+def exception_func():
+    raise ValueError

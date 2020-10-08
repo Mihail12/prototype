@@ -1,5 +1,3 @@
-from celery import Celery
-
 from tasks import long_task
 
 
