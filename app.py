@@ -10,7 +10,7 @@ from __init__ import create_app, CeleryObj
 app = create_app()
 app.secret_key = "DataRoadReflect"
 
-celery = Celery('demo', broker=['pyamqp://guest@localhost//', 'redis://localhost:6379'], include=['tasks', 'task1'])
+celery = Celery('demo', broker=['redis://localhost:6379'], include=['tasks'])
 
 applogger = app.logger
 socketio = SocketIO(app, message_queue='redis://')
