@@ -5,13 +5,12 @@ from celery import Celery
 from flask import render_template, request, jsonify, session
 from flask_socketio import SocketIO, join_room
 from random import randint
-from __init__ import create_app
-
+from __init__ import create_app, CeleryObj
 
 app = create_app()
 app.secret_key = "DataRoadReflect"
 
-celery = Celery('demo', broker='redis://localhost:6379', include=['tasks'])
+celery = Celery('demo', broker=['pyamqp://guest@localhost//', 'redis://localhost:6379'], include=['tasks', 'task1'])
 
 applogger = app.logger
 socketio = SocketIO(app, message_queue='redis://')
