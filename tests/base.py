@@ -1,12 +1,15 @@
 import os
 import sys
 from unittest import TestCase
+from unittest.mock import patch
+
 
 # This row of code should be in order to start test without error.
 # This row should be below import from app
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from f_app import flask_app
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+with patch('__init__.logging') as mock:
+    from f_app import flask_app
 
 
 class BaseTests(TestCase):

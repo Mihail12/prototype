@@ -21,16 +21,14 @@ class TasksTestCase(BaseTests):
     def setUpClass(cls):
         super(TasksTestCase, cls).setUpClass()
 
-    @patch('tasks.applogger')
     @patch('tasks.broadcast_message')
     @patch('time.sleep')
-    def test_long_task(self, _, __, ___):
+    def test_long_task(self, _, __):
         result = long_task(10, 'task_event', 'namespace')
         self.assertEqual(result, 'Done')
 
-    @patch('tasks.applogger')
     @patch('tasks.broadcast_message')
-    def test_fibonacci_task(self, _, __):
+    def test_fibonacci_task(self, _):
         result = fibonacci_task(10, 'task_event', 'namespace')
         self.assertEqual(result, fib(10))
 

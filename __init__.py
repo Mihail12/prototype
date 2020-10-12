@@ -1,5 +1,6 @@
 import logging
 
+from celery import Celery
 from flask import Flask
 
 
@@ -16,3 +17,13 @@ def create_app():
     flask_app.logger.addHandler(file_handler)
     flask_app.logger.addHandler(auth_file_handler)
     return flask_app
+
+
+class CeleryObj:
+    celery = None
+
+    def __init__(self, broker):
+        self.celery = Celery('demo', broker=broker, include=['tasks'])
+
+    def get_celery(self):
+        return self.celery
