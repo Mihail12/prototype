@@ -14,7 +14,7 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-sm-3">
+        <div class="col-sm-1">
             <div>Long task results for managers:</div>
             <div id="Results-1"></div>
         </div>
@@ -22,7 +22,7 @@
             <div>Fibonacci task results for aged:</div>
             <div id="Results-2"></div>
         </div>
-        <div class="col-sm-2">
+        <div class="col-sm-1">
             <form method='post' id="taskForm-3">
                 <input type="hidden" name="task-event" value="task-3">
                 <input type="hidden" name="namespace" value="/task-3">
@@ -36,12 +36,8 @@
             </form>
             <div id="Results-4"></div>
         </div>
-        <div class="col-sm-2">
-            <form method='post' id="taskForm-5">
-                <input type="hidden" name="task-event" value="task-5">
-                <input type="hidden" name="namespace" value="/task-5">
-                <button type="submit" id="taskButton-5">Not auth long task</button>
-            </form>
+        <div class="col-sm-5">
+            <div>Scheduled task results:</div>
             <div id="Results-5"></div>
         </div>
     </div>
@@ -103,22 +99,17 @@
         });
     });
     $(document).ready(function(){
-        var namespace='/long_task';
+        var namespace='/schedule_task';
         var socket = io.connect('http://' + document.domain + ':' + location.port+namespace);
         var event_name = 'task-5'
         socket.on('connect', function() {
             //// on a connection join a room
-            socket.emit('join_room');
         });
         socket.on(event_name, function(data) {
             $("#Results-5").prepend('<li>'+data.msg+'</li>');
         });
         socket.on('status', function(data) {
-            if (data.msg=='End'){
-                $("#taskButton-5").show()
-            }
-            else if (data.msg=='Begin_not_auth') {
-                $("#taskButton-5").hide();
+        if (data.msg=='Begin_schedule_task') {
                 $("#Results-5").empty();
             };
 
@@ -127,20 +118,6 @@
 
 </script>
 <script>
-    $("#taskButton-2").click(function(e){
-        $("#taskButton-2").hide();
-        $.ajax({ type: "POST",
-            url:'run-fibonacci-task',
-            data: $("#taskForm-2").serialize(),
-            success:function(data)
-            {task=data.id;
-                $("#Results-2").empty();
-                $("#Results-2").prepend('<li>Task ID:'+task+' has been submitted.</li>');
-            }
-        });
-        e.preventDefault();
-        console.log('complete')
-    });
     $("#taskButton-3").click(function(e){
         $("#taskButton-3").hide();
         $.ajax({ type: "POST",
@@ -166,20 +143,6 @@
                 variable=data.variable;
                 $("#Results-4").empty();
                 $("#Results-4").prepend('<li>'+variable+' </li>');
-            }
-        });
-        e.preventDefault();
-        console.log('complete')
-    });
-    $("#taskButton-5").click(function(e){
-        $("#taskButton-5").hide();
-        $.ajax({ type: "POST",
-            url:'run-not-auth-task',
-            data: $("#taskForm-5").serialize(),
-            success:function(data)
-            {task=data.id;
-                $("#Results-5").empty();
-                $("#Results-5").prepend('<li>Task ID:'+task+' has been submitted.</li>');
             }
         });
         e.preventDefault();

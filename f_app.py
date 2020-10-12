@@ -5,16 +5,19 @@ from celery import Celery
 from flask import render_template, request, jsonify, session
 from flask_socketio import SocketIO, join_room
 from random import randint
+
+import celeryconfig
 from __init__ import create_app
 
 
-app = create_app()
-app.secret_key = "DataRoadReflect"
+flask_app = create_app()
+flask_app.secret_key = "DataRoadReflect"
 
-celery = Celery('demo', broker='redis://localhost:6379', include=['tasks'])
+celery_app = Celery('demo', broker='redis://localhost:6379', include=['tasks'])
+celery_app.config_from_object(celeryconfig)
 
-applogger = app.logger
-socketio = SocketIO(app, message_queue='redis://')
+applogger = flask_app.logger
+socketio = SocketIO(flask_app, message_queue='redis://')
 
 user_1 = {
     'id': 1,
@@ -45,7 +48,7 @@ user_4 = {
 users = [user_1, user_2, user_3, user_4]
 
 
-@app.route("/", methods=['GET'])
+@flask_app.route("/", methods=['GET'])
 def index():
     current_user = random.choice(users)
     # create a unique session id
@@ -56,49 +59,39 @@ def index():
     return render_template('index.html', **current_user)
 
 
-@app.route("/runTask", methods=['POST'])
+@flask_app.route("/runTask", methods=['POST'])
 def long_task_endpoint():
     applogger.info(f"long_task_endpoint touched with request method {request.method}")
 
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
     n = randint(5, 20)
-    task = celery.send_task('tasks.long_task', args=(n, task_event, namespace))
+    task = celery_app.send_task('tasks.long_task', args=(n, task_event, namespace))
 
     return jsonify({'id': task.id, "number": n})
 
 
-@app.route("/run-fibonacci-task", methods=['POST'])
+@flask_app.route("/run-fibonacci-task", methods=['POST'])
 def fibonacci_task_endpoint():
     applogger.info(f"fibonacci_task_endpoint touched with request method {request.method}")
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
     n = randint(10000, 20000)
-    task = celery.send_task('tasks.fibonacci_task', args=(n, task_event, namespace))
+    task = celery_app.send_task('tasks.fibonacci_task', args=(n, task_event, namespace))
     return jsonify({'id': task.id, "number": n})
 
 
-@app.route("/matrix-task", methods=['POST'])
+@flask_app.route("/matrix-task", methods=['POST'])
 def matrix_task_endpoint():
     applogger.info(f"matrix_task_endpoint touched with request method {request.method}")
     task_event = request.form.get('task-event')
     namespace = request.form.get('namespace')
     sid = str(session['uid'])
-    task = celery.send_task('tasks.matrix_task', args=(sid, task_event, namespace))
+    task = celery_app.send_task('tasks.matrix_task', args=(sid, task_event, namespace))
     return jsonify({'id': task.id})
 
 
-@app.route("/run-not-auth-task", methods=['POST'])
-def not_auth_long_task_endpoint():
-    task_event = request.form.get('task-event')
-    namespace = request.form.get('namespace')
-    n = randint(0, 15)
-    task = celery.send_task('tasks.not_auth_long_task', args=(n, task_event, namespace))
-
-    return jsonify({'id': task.id})
-
-
-@app.route("/api/test", methods=['GET'])
+@flask_app.route("/api/test", methods=['GET'])
 def test_api():
 
     time.sleep(4)
@@ -113,7 +106,7 @@ def socket_connect_auth(*args, **kwargs):
         print('NOT connected')
         raise ConnectionRefusedError('unauthorized!')
 
-    print('connected')
+    print('connected socket_connect_auth')
 
 
 @socketio.on('connect', namespace='/aged')
@@ -122,17 +115,17 @@ def socket_connect_auth(*args, **kwargs):
         print('NOT connected')
         raise ConnectionRefusedError('unauthorized!')
 
-    print('connected')
+    print('connected socket_connect_auth')
 
 
 @socketio.on('connect')
-def socket_connect(*args, **kwargs):
+def socket_auth(*args, **kwargs):
     # user = request.user
     # if user.is_authenticated():
     #     return 'Not Allowed'
 
     user_data = args
-    print('connected')
+    print('connected socket_auth')
     # your logic ...
     # app.login(user_data)
 
@@ -147,9 +140,13 @@ def on_room(*args, **kwargs):
     join_room(room)
 
 
+@socketio.on('join_room', namespace='/schedule_task')
+def on_room(*args, **kwargs):
+    print('connected schedule_task')
+
 if __name__ == "__main__":
 
     import logging
     logging.basicConfig(filename='error.log', level=logging.DEBUG)
 
-    socketio.run(app, debug=True, host="0.0.0.0")
+    socketio.run(flask_app, debug=True, host="0.0.0.0")

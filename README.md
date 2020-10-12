@@ -12,7 +12,7 @@ sudo apt-get install supervisor -y
 sudo service supervisor start
 
 `redis-server`  
-`supervisord -c /Users/michaelspasenko/PycharmProjects/prototype/celery.conf`
+`supervisord -c /Users/michaelspa/PycharmProjects/prototype/celery.conf`
 
 supervisorctl start  
 supervisorctl stop

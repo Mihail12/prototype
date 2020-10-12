@@ -2,7 +2,7 @@ import numpy
 import time
 from flask_socketio import SocketIO
 from numpy import argsort
-from app import celery, applogger
+from f_app import celery_app, applogger
 
 import os
 
@@ -31,7 +31,7 @@ def cpu_unlimit(task_pid):
     os.system(f"cpulimit -l 100 -p {task_pid}")
 
 
-@celery.task
+@celery_app.task
 def long_task(n, task_event, namespace):
     applogger.info("start long_task")
     applogger.info(f'proc index {os.getpid() }')
@@ -54,7 +54,7 @@ def long_task(n, task_event, namespace):
     return 'Done'
 
 
-@celery.task
+@celery_app.task
 def fibonacci_task(n, task_event, namespace):
     applogger.info("start fibonacci_task")
 
@@ -87,7 +87,7 @@ def fibonacci_task(n, task_event, namespace):
     return n1
 
 
-@celery.task
+@celery_app.task
 def matrix_task(session, task_event, namespace):
 
     applogger.info("start matrix_task")
@@ -117,20 +117,23 @@ def matrix_task(session, task_event, namespace):
     applogger.info("end matrix_task")
 
 
-@celery.task
-def not_auth_long_task(n, task_event, namespace):
-    applogger.info("start not_auth_long_task")
-    namespace = '/long_task'
+@celery_app.task
+def schedule_task(task_event, namespace):
+    # Inspect all nodes.
+    i = celery_app.control.inspect()
 
-    broadcast_message('status', namespace, 'Begin_not_auth')
-    broadcast_message(task_event, namespace, 'Begin task {}'.format(long_task.request.id))
-    broadcast_message(task_event, namespace, 'This task will take {} seconds.'.format(n))
+    # Show tasks that are currently active.
+    # i.active()
 
-    for i in range(n):
-        broadcast_message(task_event, namespace, str(i))
-        time.sleep(1)
 
-    broadcast_message(task_event, namespace, 'End Task {}'.format(long_task.request.id))
+    # applogger.info(f"start schedule_task {task_event}, {namespace}")
+    broadcast_message('status', namespace, 'Begin_schedule_task')
+    broadcast_message(task_event, namespace, str(i.active()))
+    # broadcast_message(task_event, namespace, 'This task will print 10 random numbers')
+    # for i in range(10):
+    #     broadcast_message(task_event, namespace, str(random.randint(1, 100000)))
+    #     time.sleep(1)
+    # broadcast_message(task_event, namespace, 'End Task {}'.format(schedule_task.request.id))
     broadcast_message('status', namespace, 'End')
 
 
