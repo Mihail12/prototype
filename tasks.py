@@ -1,3 +1,5 @@
+import datetime
+
 import numpy
 import time
 from flask_socketio import SocketIO
@@ -120,22 +122,27 @@ def matrix_task(session, task_event, namespace):
 @celery_app.task
 def schedule_task(task_event, namespace):
     # Inspect all nodes.
-    i = celery_app.control.inspect()
+    inspect = celery_app.control.inspect()
 
     # Show tasks that are currently active.
     # i.active()
 
 
-    # applogger.info(f"start schedule_task {task_event}, {namespace}")
+    # applogger.info(f"start schedule_task {dir(inspect)}")
     broadcast_message('status', namespace, 'Begin_schedule_task')
-    broadcast_message(task_event, namespace, str(i.active()))
-    # broadcast_message(task_event, namespace, 'This task will print 10 random numbers')
-    # for i in range(10):
-    #     broadcast_message(task_event, namespace, str(random.randint(1, 100000)))
-    #     time.sleep(1)
-    # broadcast_message(task_event, namespace, 'End Task {}'.format(schedule_task.request.id))
+    broadcast_message(task_event, namespace, str(datetime.datetime.now()))
+    broadcast_message(task_event, namespace, f'active: {str(inspect.active())}')
+    broadcast_message(task_event, namespace, f'registered: {(str(inspect.registered()))}')
+    broadcast_message(task_event, namespace, '')
+    broadcast_message(task_event, namespace, '')
     broadcast_message('status', namespace, 'End')
 
+
+# The only explanation is that you have some connectivity issues, otherwise it should work every time you run, unless genuinely there are no tasks to report. In other words - the cluster is idle.
+#
+# Keep in mind that inspect broadcasts a message to all the workers and waits for their replies. If some of them times out for whatever reason(s), you will not see that worker in the output. If it happens that only that worker was busy, you may end up with an empty list of tasks.
+#
+# Try to call something like celery -A yourproject.celeryapp status to see if your workers are responsive, and if everything is OK run your script. - It should work.
 
 def exception_func():
     raise ValueError
