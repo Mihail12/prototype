@@ -9,3 +9,6 @@ CELERYBEAT_SCHEDULE = {
         'args': ('task-5', '/schedule_task')
     },
 }
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
